@@ -1,21 +1,43 @@
 # import packages
 import sys
-
+import numpy as np
+import matplotlib.pyplot as plt
+import re
+from collections import defaultdict
+from sqlalchemy import create_engine
 
 def load_data(data_file):
     # read in file
+    return pd.read_csv(data_file)
 
+def str_to_dict(x):
+    list_ = re.split('\W+',x)
+    return {key:value for key, value in zip(list_[0:][::2], list_[1:][::2])}
 
-    # clean data
+def clean_categories(categories):
+    df_ = pd.DataFrame(list(categories.categories.map(lambda x : str_to_dict(x))))
+    return pd.concat([categories['id'], df_], axis=1)
 
+def merge_datasets(messages, categories_clean)
+    return messages.merge(categories_clean, on=('id')).drop_duplicates()
 
+def load_to_db(df, db_name):
     # load to database
+    engine = create_engine('sqlite:///{}'.format(db_name), echo=False)
+    df.to_sql('messages_categories',engine, index=False)
+
+def generate_X(data_file):
+    pass
+
+def generate_y(data_file):
+    pass
+    
 
 
     # define features and label arrays
 
 
-    return X, y
+#    return X, y
 
 
 def build_model():
