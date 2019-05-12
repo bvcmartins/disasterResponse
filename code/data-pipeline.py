@@ -8,7 +8,11 @@ from sqlalchemy import create_engine
 
 def load_data(data_file):
     # read in file
-    return pd.read_csv(data_file)
+    try:
+        file = pd.read_csv(data_file)
+    except:
+        file = None
+    return file
 
 def str_to_dict(x):
     list_ = re.split('\W+',x)
