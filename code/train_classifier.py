@@ -1,4 +1,4 @@
-#!/usr/bin/python 
+#!/usr/bin/env python3
 
 import sys
 import pandas as pd
@@ -42,11 +42,13 @@ def load_data(database_filepath):
         input: database filepath
         output: dataframe
     '''
-    engine = create_engine(database_filepath)
+    engine = create_engine('sqlite:///disasterResponse_test.db')
+    
+    #engine = create_engine(database_filepath)
     df = pd.read_sql('SELECT * FROM messages_categories', engine)
     df.iloc[:,4:] = df.iloc[:,4:].astype('int64')
-    df.drop('related', axis=1, inplace=True)
-    return df
+    df.drop(['related','child_alone'], axis=1, inplace=True)
+    return df.message.copy(), df.iloc[:,4:].values, df.iloc[:,4:].columns.values
 
 
 def tokenize(text):
@@ -120,9 +122,15 @@ def save_model(model, model_filepath):
 def main():
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
-        print('Loading data...\n    DATABASE: {}'.format(database_filepath))
+        #print(database_filepath)
+        #engine = create_engine(database_filepath)
+        #df = pd.read_sql('SELECT * FROM messages_categories', engine)
+        
+        #engine = create_engine('sqlite:///data/disasterResponse.db')
+        #print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
+        #load_data(database_filepath)
+        #X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         
         #print('Building model...')
         #model = build_model()
