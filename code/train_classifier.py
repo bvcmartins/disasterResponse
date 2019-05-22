@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
 
 import sys
 import pandas as pd
@@ -84,14 +84,7 @@ def build_model():
     ('tfidf', TfidfTransformer()),
     ('abclf', MultiOutputClassifier(AdaBoostClassifier()))])
 
-def train_model(X, y, pipeline):
-    #X = df.message.copy()
-    #y = df.iloc[:,4:].values 
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=32) 
-    return pipeline.fit(X_train, y_train)
-
-def cross_val(X_train, y_train, pipeline):
+def cross_val(X_train, y_train, model):
     labels = []
     preds = []
     kf = KFold(n_splits=5, shuffle=True)
@@ -103,46 +96,61 @@ def cross_val(X_train, y_train, pipeline):
         X_test_kf = X_train.iloc[test_indices]
         y_test_kf = y_train[test_indices]
   
-        pipeline.fit(X_train_kf, y_train_kf)
+        model.fit(X_train_kf, y_train_kf)
     
-                
         labels.extend(y_test_kf)
-        preds.extend(pipeline.predict(X_test_kf))
+        preds.extend(model.predict(X_test_kf))
 
     return pd.DataFrame(labels), pd.DataFrame(preds)
 
-def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+def scoring(scoring_metric, category_names, labels_df, \
+preds_df):
+    return np.mean(np.array(\
+    [scoring_metric(labels_df.iloc[:,column], preds_df.iloc[:,column]) for column in range(0,len(category_names))]))
+ 
+def cross_validation(model, labels_df, preds_df, category_names):
+    list_scores = [f1_score, accuracy_score, precision_score, recall_score]
+    return {str(metric.__name__):scoring(metric, labels_df, preds_df) for metric in list_scores}
 
+def evaluate_model(model, X_test, y_test, category_names):
+    y_preds = model.predict(X_test)
+    labels_df = pd.DataFrame(y_test)
+    preds_df = pd.DataFrame(y_preds)
+    list_scores = [f1_score, accuracy_score, precision_score, recall_score]
+    #{str(metric.__name__):scoring(metric, labels_df, preds_df) for metric in list_scores}
+
+    return {column: f1_score(labels_df.iloc[:,column], preds_df.iloc[:,column]) for column in range(0,len(category_names))}
 
 def save_model(model, model_filepath):
-    pass
+    pickle.dump(model, open(model_filepath,'wb'))
 
 
 def main():
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
-        #print(database_filepath)
-        #engine = create_engine(database_filepath)
-        #df = pd.read_sql('SELECT * FROM messages_categories', engine)
+        print('Loading data...\n    DATABASE: {}'\
+        .format(database_filepath))
+        X, y, category_names = load_data(database_filepath)
+        X_train, X_test, y_train, y_test = \
+        train_test_split(X, y, test_size=0.2)
         
-        #engine = create_engine('sqlite:///data/disasterResponse.db')
-        #print('Loading data...\n    DATABASE: {}'.format(database_filepath))
-        X, Y, category_names = load_data(database_filepath)
-        #load_data(database_filepath)
-        #X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
+        print('Building model...')
+        model = build_model()
         
-        #print('Building model...')
-        #model = build_model()
+        print('Training model...')
+        model.fit(X_train, y_train)
         
-        #print('Training model...')
-        #model.fit(X_train, Y_train)
-        
-        #print('Evaluating model...')
-        #evaluate_model(model, X_test, Y_test, category_names)
+        #print('Evaluating model - cross val...')
+        #labels_df, preds_df = cross_val(X_train, y_train, model)
+        #scoring(f1_score, category_names, labels_df, preds_df) 
+        print('Evaluating model...')
+        dict_evaluate = evaluate_model(model, X_test, y_test, category_names)
+        print(dict_evaluate)
 
-        #print('Saving model...\n    MODEL: {}'.format(model_filepath))
-        #save_model(model, model_filepath)
+        
+        model_filepath='data/ml_pipeline_improved.pkl'
+        print('Saving model...\n    MODEL: {}'.format(model_filepath))
+        save_model(model, model_filepath)
 
         #print('Trained model saved!')
 
