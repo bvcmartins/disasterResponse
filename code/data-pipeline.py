@@ -119,7 +119,7 @@ def build_model():
     grid_model = GridSearchCV(ml_pipeline, param_grid=parameters, verbose=10)
     return grid_model
 
-def train(X, y, model):
+def train(X, y, model, columns):
     # train test split
     X_train, X_test, y_train, y_test =\
     train_test_split(X, y, test_size=0.2, random_state=32) 
@@ -130,7 +130,7 @@ def train(X, y, model):
     # output model test results
     model.predict(X_test)
 
-    dict_predict = {column: f1_score(y_test[:,n], y_pred[:,n]) for n, column in enumerate(df.iloc[:,4:].columns.values)}
+    dict_predict = {column: f1_score(y_test[:,n], y_pred[:,n]) for n, column in enumerate(columns)}
 
     return model, dict_predict
 
@@ -148,7 +148,8 @@ def run_pipeline(data_file):
     y = generate_y(df)
     model = build_model()  # build model pipeline
     # train model pipeline
-    model, dict_predict = train(X, y, model)  
+    columns = df.iloc[:,4:].columns.values
+    model, dict_predict = train(X, y, model, columns)  
     export_model(model)  # save model
 
 if __name__ == '__main__':
