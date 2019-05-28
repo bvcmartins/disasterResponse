@@ -31,7 +31,28 @@ AdaBoost classifier
 	* Bootstrap
 	* Plotly
 
+## Usage
+
+* Training files:
+	* go to code folder
+	* run data-pipeline.py:
+	```
+		python data-pipeline.py <path to messages csv file> <path to categories csv file>
+	```
+	* run train_classifier.py:
+	```
+		python train_classifier.py <path to db> <path to model pkl>
+	```
+
+* Web App:
+	* go to app folder
+	* run run.py
+	```
+		$python run.py
+	```
+	* on your browser go to http://0.0.0.0:3001
 ## Files
+
 * NLP code 
 	* code/data-pipeline.py
 	* code/train_pipeline.py
