@@ -1,4 +1,3 @@
-
 import sys
 import pandas as pd
 import numpy as np
@@ -14,15 +13,8 @@ from nltk.stem import WordNetLemmatizer
 import pickle
 
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.svm import SVC
-from sklearn.linear_model import LogisticRegression, Perceptron
-from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import accuracy_score, precision_score
 from sklearn.metrics import recall_score
@@ -37,9 +29,10 @@ from imblearn.over_sampling import SMOTE
 
 def load_data(database_filepath):
     '''
-        Loads database to dataframe and perform preliminary cleaning
+        Loads database to dataframe
+        and performs preliminary cleaning
         input: database filepath
-        output: X, y, columns 
+        output: dataframes X, y, columns 
     '''
     #engine = create_engine('sqlite:///../data/disasterResponse_test.db')
     
@@ -48,7 +41,8 @@ def load_data(database_filepath):
     df = pd.read_sql(query, engine)
     df.iloc[:,4:] = df.iloc[:,4:].astype('int64')
     df.drop(['related','child_alone'], axis=1, inplace=True)
-    return df.message.copy(), df.iloc[:,4:].values, df.iloc[:,4:].columns.values
+    return df.message.copy(), df.iloc[:,4:].values, 
+df.iloc[:,4:].columns.values
 
 class Clean_text(BaseEstimator, TransformerMixin):
     """
@@ -123,6 +117,11 @@ def evaluate_model(model, X_test, y_test, columns):
                 enumerate(columns)}for scoring in list_scorings})
 
 def save_model(model, model_filepath):
+    """
+        Saves model as a pickle file
+        input: model, model filepath
+        output: none
+    """
     pickle.dump(model, open(model_filepath,'wb'))
 
 
@@ -142,19 +141,16 @@ def main():
         print('Training model...')
         model.fit(X_train, y_train)
         
-        #print('Evaluating model - cross val...')
-        #labels_df, preds_df = cross_val(X_train, y_train, model)
-        #scoring(f1_score, category_names, labels_df, preds_df) 
         print('Evaluating model...')
-        df_evaluate = evaluate_model(model, X_test, y_test, \
-                category_names)
+        df_evaluate = evaluate_model(model, X_test, \
+                y_test, category_names)
         print(df_evaluate)
 
         
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
         save_model(model, model_filepath)
 
-        #print('Trained model saved!')
+        print('Trained model saved!')
 
     else:
         print('Please provide the filepath of the disaster messages database '\
