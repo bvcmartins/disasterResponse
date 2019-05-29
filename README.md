@@ -6,8 +6,9 @@ Project 5 for Udacity's Data Scientist Nanodegree
 
 Figure Eight provided us with a annotated dataset containing
 Twitter messages collected from disaster regions.
-The dataset is classified in 36 categories (only 34 were
-used). The project consisted of:
+The dataset is classified in 36 categories. 
+
+The project consisted of:
 
 1. Implementing a NLP pipeline to clean and vectorize 
 text data 
@@ -61,6 +62,8 @@ AdaBoost classifier
 	* go.html 
 	* run.py
 	* wrangling.py
+	
+* Jupyter notebooks were used for exploratory analysis.
 
 ## Conclusions
 
